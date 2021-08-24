@@ -1,4 +1,33 @@
 from itertools import combinations
+from random import randint
+from os import system, name
+def clear():
+    if name=='posix': system('clear')
+    if name=='nt': system ('cls')
+    print ('''
+    ╔═══════════════════════════╗
+    ║    minesweeper1.2.3.2     ║
+    ╠═══════════════════════════╣
+    ║    Powered by JNemune     ║
+    ╚═══════════════════════════╝''')
+    system(f"color {['A', 'B', 'C', 'D', 'E', 'F'][randint(0, 5)]}")
+def whole_checker (x, y):
+    try:
+        if int(x)<0 or int(x)>y: print ('Invalid input!'); return whole_checker(input('Please send an whole number: '), y)
+        return int(x)
+    except: print('Invalid input!'); return whole_checker (input ('Please send an whole number: '), y)
+def input_(inp):
+    pre_inp, fucking_inp=dict(), input('inp= ')
+    if fucking_inp=='exit': return 'exit'
+    if fucking_inp=='new': return 'new'
+    while len(fucking_inp)!=3 or not fucking_inp[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '*']: print('invalid input!'); fucking_inp=input('inp= ')
+    column, line, x=7-whole_checker(fucking_inp[0], 7), whole_checker(fucking_inp[1], 8)-1, fucking_inp[2]
+    while line!=-1 and column!=7:
+        pre_inp[(line, column)], fucking_inp=x, input('inp= ')
+        while len(fucking_inp)!=3 or not fucking_inp[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '*']: print('invalid input!'); fucking_inp=input('inp= ')
+        column, line, x=7-whole_checker(fucking_inp[0], 7), whole_checker(fucking_inp[1], 8)-1, fucking_inp[2]
+    for i in pre_inp: inp[i]=pre_inp[i]
+    return inp
 def neighbor (x):
     out = list ()
     (line, column) = x
@@ -102,7 +131,7 @@ def identify100and0_v2 (inp, item):
 def total_mine (inp):
     likely_houses, big_mine_possibility, free_houses, mines = dict (), list (), list (), list (inp.values ()).count ('*')
     for i in inp:
-        if inp[i]=='-':free_houses.append(i)
+        if inp[i]=='-': free_houses.append(i)
     for item in inp:
         if not (inp [item] in ['.', '*', '0', '-']):
             house_value, mine_possibility=int(inp[item]), list()
@@ -125,20 +154,20 @@ def total_mine (inp):
         for i in free_houses: inp[i]='.'
         for i in inp: identify100and0(inp,i);identify100and0_v2(inp,i)
         return inp
-    if len(likely_houses)!=0 and free_len<max_guess:
-        def total_guess(likely_houses_keys, likely_houses_values, mine, out=list (), pre_out=list (), c=0):
+    if len(likely_houses)!=0:
+        def total_guess(likely_houses_keys, likely_houses_values, out=list (), pre_out=list (), c=0):
             for i in combinations(likely_houses_keys[c], likely_houses_values[c]):
                 for j in i: pre_out.append(j)
                 if c==len(likely_houses_keys)-1:
-                    if len(set(pre_out))<mine: out.append(list(set(pre_out)))
+                    out.append(list(set(pre_out)))
                     for j in range(len(i)): pre_out.pop()
                 else:
                     c+=1
-                    total_guess(likely_houses_keys, likely_houses_values, mine, out, pre_out, c)
+                    total_guess(likely_houses_keys, likely_houses_values, out, pre_out, c)
                     c-=1
                     for j in range(len(i)): pre_out.pop()
             return out
-        change_to_100, change_to_0, out_100, out_0, guesses = list (), list (), list (), list (), total_guess(list(likely_houses.keys()), list(likely_houses.values()), mines)
+        change_to_100, change_to_0, out_100, out_0, guesses = list (), list (), list (), list (), total_guess(list(likely_houses.keys()), list(likely_houses.values()))
         for i in guesses:
             new_inp, identify_check=inp.copy(), True
             for j in i: new_inp[j]='*'
@@ -174,54 +203,53 @@ def total_mine (inp):
                 for j in neighbor (i): inp = identify100and0 (inp, j)
     return inp
 
-inp = dict ()
-#   'number in range (1, 8)': number that showed in field
-#   '0': hole
-#   '*': mine
-#   '-': unknown pixel
-#   '.': zero percent mine finding (It will given by program)
-for line in range (8):
-    pre_inp = input ().split ()
-    for column in range (7):
-        inp [(line, column)] = pre_inp [column]
+clear()
+beginning_inp={(0, 0): '-', (0, 1): '-', (0, 2): '-', (0, 3): '-', (0, 4): '-', (0, 5): '-', (0, 6): '-', (1, 0): '-', (1, 1): '-', (1, 2): '-', (1, 3): '-', (1, 4): '-', (1, 5): '-', (1, 6): '-', (2, 0): '-', (2, 1): '-', (2, 2): '-', (2, 3): '-', (2, 4): '-', (2, 5): '-', (2, 6): '-', (3, 0): '-', (3, 1): '-', (3, 2): '-', (3, 3): '-', (3, 4): '-', (3, 5): '-', (3, 6): '-', (4, 0): '-', (4, 1): '-', (4, 2): '-', (4, 3): '-', (4, 4): '-', (4, 5): '-', (4, 6): '-', (5, 0): '-', (5, 1): '-', (5, 2): '-', (5, 3): '-', (5, 4): '-', (5, 5): '-', (5, 6): '-', (6, 0): '-', (6, 1): '-', (6, 2): '-', (6, 3): '-', (6, 4): '-', (6, 5): '-', (6, 6): '-', (7, 0): '-', (7, 1): '-', (7, 2): '-', (7, 3): '-', (7, 4): '-', (7, 5): '-', (7, 6): '-'}
+inp=input_(beginning_inp.copy())
+clear()
+while inp!='exit':
+    while not inp in ['new', 'exit']:
+        inp_saver = inp.copy ()
+        while True:
+            for item in inp: inp=identify100and0 (inp, item)
+            if inp == inp_saver: break
+            inp_saver=inp.copy()
+        while True:    
+            if '-' in inp.values():
+                for item in inp: inp=identify100and0_v2(inp, item)
+            if inp==inp_saver: break
+            inp_saver=inp.copy()
+        total_mine(inp)
+        while inp!=inp_saver:
+            inp_saver=total_mine(inp).copy()
 
-inp_saver = inp.copy ()
-while True:
-    for item in inp:
-        inp = identify100and0 (inp, item)
-    if inp == inp_saver:
-        break
-    inp_saver = inp.copy ()
-while True:    
-    if '-' in inp.values ():
-        for item in inp:
-            inp = identify100and0_v2 (inp, item)
-    if inp == inp_saver:
-        break
-    inp_saver = inp.copy ()
-total_mine(inp)
-while inp!=inp_saver:
-    inp_saver=total_mine(inp).copy()
-
-for i in inp:
-    if inp[i]=='.': inp[i]=' '
-    if inp[i]=='0': inp[i]=' '
-    if inp[i]=='-': inp[i]='?'
-print(f'''
-╔═══╤═══╤═══╤═══╤═══╤═══╤═══╗
-║ {inp[(0, 0)]} │ {inp[(0, 1)]} │ {inp[(0, 2)]} │ {inp[(0, 3)]} │ {inp[(0, 4)]} │ {inp[(0, 5)]} │ {inp[(0, 6)]} ║
-╟───┼───┼───┼───┼───┼───┼───╢
-║ {inp[(1, 0)]} │ {inp[(1, 1)]} │ {inp[(1, 2)]} │ {inp[(1, 3)]} │ {inp[(1, 4)]} │ {inp[(1, 5)]} │ {inp[(1, 6)]} ║
-╟───┼───┼───┼───┼───┼───┼───╢
-║ {inp[(2, 0)]} │ {inp[(2, 1)]} │ {inp[(2, 2)]} │ {inp[(2, 3)]} │ {inp[(2, 4)]} │ {inp[(2, 5)]} │ {inp[(2, 6)]} ║
-╟───┼───┼───┼───┼───┼───┼───╢
-║ {inp[(3, 0)]} │ {inp[(3, 1)]} │ {inp[(3, 2)]} │ {inp[(3, 3)]} │ {inp[(3, 4)]} │ {inp[(3, 5)]} │ {inp[(3, 6)]} ║
-╟───┼───┼───┼───┼───┼───┼───╢
-║ {inp[(4, 0)]} │ {inp[(4, 1)]} │ {inp[(4, 2)]} │ {inp[(4, 3)]} │ {inp[(4, 4)]} │ {inp[(4, 5)]} │ {inp[(4, 6)]} ║
-╟───┼───┼───┼───┼───┼───┼───╢
-║ {inp[(5, 0)]} │ {inp[(5, 1)]} │ {inp[(5, 2)]} │ {inp[(5, 3)]} │ {inp[(5, 4)]} │ {inp[(5, 5)]} │ {inp[(5, 6)]} ║
-╟───┼───┼───┼───┼───┼───┼───╢
-║ {inp[(6, 0)]} │ {inp[(6, 1)]} │ {inp[(6, 2)]} │ {inp[(6, 3)]} │ {inp[(6, 4)]} │ {inp[(6, 5)]} │ {inp[(6, 6)]} ║
-╟───┼───┼───┼───┼───┼───┼───╢
-║ {inp[(7, 0)]} │ {inp[(7, 1)]} │ {inp[(7, 2)]} │ {inp[(7, 3)]} │ {inp[(7, 4)]} │ {inp[(7, 5)]} │ {inp[(7, 6)]} ║
-╚═══╧═══╧═══╧═══╧═══╧═══╧═══╝''')
+        inp_print=inp.copy()
+        for i in inp_print:
+            if inp_print[i]=='.':
+                neighbors=list()
+                for j in neighbor(i): neighbors.append(inp_print[j])
+                if not '-' in neighbors: inp_print[i]=neighbors.count('*')
+        for i in inp_print:
+            if inp_print[i]=='-': inp_print[i]=' '
+        print('''
+    ╔═══╤═══╤═══╤═══╤═══╤═══╤═══╗
+    ║ {} │ {} │ {} │ {} │ {} │ {} │ {} ║
+    ╟───┼───┼───┼───┼───┼───┼───╢
+    ║ {} │ {} │ {} │ {} │ {} │ {} │ {} ║
+    ╟───┼───┼───┼───┼───┼───┼───╢
+    ║ {} │ {} │ {} │ {} │ {} │ {} │ {} ║
+    ╟───┼───┼───┼───┼───┼───┼───╢
+    ║ {} │ {} │ {} │ {} │ {} │ {} │ {} ║
+    ╟───┼───┼───┼───┼───┼───┼───╢
+    ║ {} │ {} │ {} │ {} │ {} │ {} │ {} ║
+    ╟───┼───┼───┼───┼───┼───┼───╢
+    ║ {} │ {} │ {} │ {} │ {} │ {} │ {} ║
+    ╟───┼───┼───┼───┼───┼───┼───╢
+    ║ {} │ {} │ {} │ {} │ {} │ {} │ {} ║
+    ╟───┼───┼───┼───┼───┼───┼───╢
+    ║ {} │ {} │ {} │ {} │ {} │ {} │ {} ║
+    ╚═══╧═══╧═══╧═══╧═══╧═══╧═══╝'''.format(*list(inp_print.values())))
+        inp=input_(inp)
+        clear()
+    inp=input_(beginning_inp.copy())
+    clear()
