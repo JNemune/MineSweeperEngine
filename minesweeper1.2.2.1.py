@@ -20,6 +20,16 @@ def common_neighbor_finder (inp): #finding common neighbors between houses in in
         if x == 0:
             out.append (i)
     return (out)
+def guess (inp, mine_possibility, house_value):
+    changes = list ()
+    house_value -= 1
+    for i in mine_possibility:
+        changes.append (i)
+        if len (changes) == house_value + 1:
+            
+            yield inp
+        else:
+            guess (inp)
 def identify100and0 (inp, item, unknown_valued_list, unknown_valued_mine_possibility):
     if not (inp [item] in ['.', '*', '0', '-']):
         house_value = int (inp [item]) - unknown_valued_mine_possibility
@@ -53,6 +63,19 @@ def identify100and0 (inp, item, unknown_valued_list, unknown_valued_mine_possibi
             for i in common_neighbors:
                 identify100and0 (inp, i, mine_possibility, house_value)
     return inp
+def identify100and0_v2 (inp, item):
+    if not (inp [item] in ['.', '*', '0', '-']):
+        house_value = int (inp [item])
+        mine_possibility = list ()
+        neighbors_list = neighbor (item)
+        for i in neighbors_list:
+            if inp [i] == '*':
+                house_value -= 1
+            elif inp [i] == '-':
+                mine_possibility.append (i)
+        if len (mine_possibility) != 0 and house_value != 0:
+            new_inp = guess (inp, item, house_value)
+            
 
 inp = dict ()
 #   'number in range (1, 8)': number that showed in field
