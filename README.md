@@ -2,7 +2,7 @@
 Play two-player mine sweeper with engine. The winner of which is the one who finds and disposes more mines.
 For more information visit this robot: T.me/minroobot. This engine is going to play the game as a human (maybe better).
 
-map road:
+road map:
    1) algorithm
        ✅1.1) inputs
        1.2) identify certain houses
