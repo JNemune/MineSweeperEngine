@@ -1,6 +1,7 @@
 from itertools import combinations
 from random import randint
-from os import system, name
+from os import system, name, chdir, unlink
+chdir('C:\\Users\\lenovo\\Desktop')
 def clear():
     if name=='posix': system('clear')
     if name=='nt': system ('cls')
@@ -17,16 +18,20 @@ def whole_checker (x, y):
         return int(x)
     except: print('Invalid input!'); return whole_checker (input ('Please send an whole number: '), y)
 def input_(inp):
+    inp_file=open('InpSaver.txt', 'a')
     pre_inp, fucking_inp=dict(), input('inp= ')
-    if fucking_inp=='exit': return 'exit'
-    if fucking_inp=='new': return 'new'
+    if fucking_inp=='exit': inp_file.close(); return 'exit'
+    if fucking_inp=='new': inp_file.close(); return 'new'
     while len(fucking_inp)!=3 or not fucking_inp[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '*']: print('invalid input!'); fucking_inp=input('inp= ')
     column, line, x=7-whole_checker(fucking_inp[0], 7), whole_checker(fucking_inp[1], 8)-1, fucking_inp[2]
+    inp_file.write(f'{7-column}{line+1}{x}\n')
     while line!=-1 and column!=7:
         pre_inp[(line, column)], fucking_inp=x, input('inp= ')
         while len(fucking_inp)!=3 or not fucking_inp[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '*']: print('invalid input!'); fucking_inp=input('inp= ')
         column, line, x=7-whole_checker(fucking_inp[0], 7), whole_checker(fucking_inp[1], 8)-1, fucking_inp[2]
+        if line!=-1 and column!=7: inp_file.write(f'{7-column}{line+1}{x}\n')
     for i in pre_inp: inp[i]=pre_inp[i]
+    inp_file.close()
     return inp
 def neighbor (x):
     out = list ()
@@ -251,5 +256,7 @@ while inp!='exit':
     ╚═══╧═══╧═══╧═══╧═══╧═══╧═══╝'''.format(*list(inp_print.values())))
         inp=input_(inp)
         clear()
+    unlink('InpSaver.txt')
     inp=input_(beginning_inp.copy())
     clear()
+unlink('InpSaver.txt')

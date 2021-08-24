@@ -10,7 +10,7 @@ map road:
            ✅1.2.2) identify whit more than one neighbor
            1.2.3) use numbers of all mines in the filed
         1.3) probability calculation
-        1.4) prepare a checker(generat map and solve it)
+        1.4) prepare a checker(generate map and solve it)
             1.4.1) prepare performance reports
         1.5) choice between same-chance houses
             1.5.1) using p (the chance of finding mine) and p' (the opponent's chance if finding mine failed)
@@ -26,7 +26,6 @@ map road:
             1.7.2) help to prove the bad chance for opponent and escape the main move(is tha true? check it with checker)
         1.8) Optimization
             1.8.1) prize and turn algorithm
-            1.8.2) saveing data until the end
         1.9) prove exiting and performance
             1.9.1) lose and wins of each version
             1.9.2) time and sources of each version
@@ -38,11 +37,11 @@ map road:
             2.2.1) translate data from bot to program
                 2.2.1.1) lose algorithm for advertising
             2.2.2) start a new game automatically
-            2.2.3) messages handelling
+            2.2.3) messages handling
                 2.2.3.1) block manager
             2.2.4) request for play again
             2.2.5) get free coin
-        2.3) play more than 1 game at the same time and define maximom of same-time games
+        2.3) play more than 1 game at the same time and define maximum of same-time games
             2.3.1) duplicate games
             2.3.2) time sleep for movements
             2.3.3) try all fields
