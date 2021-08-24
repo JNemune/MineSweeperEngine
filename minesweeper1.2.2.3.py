@@ -49,8 +49,10 @@ def checker (inp):
                 return False
     return True
 def guess (inp, mine_possibility, house_value):
-    changes = list ()
-    out = list ()
+    change_to_100 = list ()
+    change_to_0 = list ()
+    out_100 = list ()
+    out_0 = list ()
     for i in combinations (mine_possibility, house_value):
         new_inp = inp.copy ()
         x = bool ()
@@ -68,18 +70,36 @@ def guess (inp, mine_possibility, house_value):
                 x = False
                 break
         if x:
-            changes.append (i)
-    for i in changes [0]:
-        y = True
-        for j in range (1, len (changes)):
-            if not (i in changes [j]):
-                y = False
+            change_to_100.append (i)
+            pre_change_to_0 = list ()
+            for i in inp:
+                if new_inp [i] == '.' and new_inp [i] != inp [i]:
+                    pre_change_to_0.append (i)
+            change_to_0.append (pre_change_to_0)
+    for i in change_to_100 [0]:
+        x = True
+        for j in range (1, len (change_to_100)):
+            if not (i in change_to_100 [j]):
+                x = False
                 break
-        if y:
-            out.append (i)
-    for i in out:
+        if x:
+            out_100.append (i)
+    for i in change_to_0 [0]:
+        x = True
+        for j in range (1, len (change_to_0)):
+            if not (i in change_to_0 [j]):
+                x = False
+                break
+        if x:
+            out_0.append (i)
+    for i in out_100:
         if inp [i] != '*':
             inp [i] = '*'
+            for j in neighbor (i):
+                inp = identify100and0 (inp, j)
+    for i in out_0:
+        if inp [i] != '.':
+            inp [i] = '.'
             for j in neighbor (i):
                 inp = identify100and0 (inp, j)
     return inp
