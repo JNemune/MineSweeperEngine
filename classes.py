@@ -1,8 +1,8 @@
 from fractions import Fraction
 from json import load
 from os import path
-from time import time
 from random import choice
+from time import time
 
 
 class House(object):

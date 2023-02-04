@@ -1,4 +1,3 @@
-import asyncio
 from json import dump, load
 from os import listdir, mkdir, path, system
 
