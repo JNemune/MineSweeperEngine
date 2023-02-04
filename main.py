@@ -66,11 +66,10 @@ class App(object):
                 and m.text[:11] == "🎮 #Turn: ⁩"
                 # and m.from_user.id == 1040284003
             ):
-                print(m.text[:11])
                 inp = self.extractor(m.reply_markup.inline_keyboard)
                 if not path.exists(path.join(".", "data_saver", f"{m.id}")):
                     mkdir(path.join(".", "data_saver", f"{m.id}"))
-                    # await m.reply(m.id)
+                    await m.reply(m.id)
                 id = len(listdir(path.join(".", "data_saver", f"{m.id}")))
                 with open(
                     path.join(".", "data_saver", f"{m.id}", f"{id:>02}.json"), "w"
@@ -91,7 +90,7 @@ class App(object):
                         except TimeoutError:
                             pass
 
-                # system("clear")
+                system("clear")
                 print(self.maps[m.id])
 
     def start(self):
@@ -105,7 +104,11 @@ class App(object):
                 mkdir(path.join(".", "data_saver", f"{m.id}"))
 
                 self.maps[m.id] = Map(7, 8, 15)
-                self.maps[m.id].update(self.extractor(m.reply_markup.inline_keyboard))
+                mv = self.maps[m.id].moves()[0]
+                inline = m.reply_markup.inline_keyboard[7 - mv[1]][mv[0]]
+                await client.request_callback_answer(
+                    m.chat.id, m.id, inline.callback_data
+                    )
 
 
 if __name__ == "__main__":
