@@ -5,10 +5,10 @@ For more information visit this robot: T.me/minroobot. This engine is going to p
 road map:  
    1) algorithm  
        ✅1.1) inputs  
-       1.2) identify certain houses  
+       ✅1.2) identify certain houses  
            ✅1.2.1) identify with one neighbor  
            ✅1.2.2) identify whit more than one neighbor  
-           1.2.3) use numbers of all mines in the filed  
+           ✅1.2.3) use numbers of all mines in the filed  
         1.3) probability calculation  
         1.4) prepare a checker(generate map and solve it)  
             1.4.1) prepare performance reports  
