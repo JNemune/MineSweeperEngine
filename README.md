@@ -31,10 +31,10 @@ road map:
             1.9.2) time and sources of each version  
     2) connect to the server  
         2.1) connection  
-            2.1.1) the program and account connection  
-            2.1.2) the account and telegram connection  
+            ✅2.1.1) the program and account connection  
+            ✅2.1.2) the account and telegram connection  
         2.2) working with bot  
-            2.2.1) translate data from bot to program  
+            ✅2.2.1) translate data from bot to program  
                 2.2.1.1) lose algorithm for advertising  
             2.2.2) start a new game automatically  
             2.2.3) messages handling  
