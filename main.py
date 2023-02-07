@@ -1,6 +1,7 @@
 from json import dump, load
 from os import listdir, mkdir, path, system
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pyrogram import Client, filters
 from pyrogram.types.messages_and_media.message import Message
 
@@ -15,6 +16,10 @@ class App(object):
         self.api_hash = config["api_hash"]
         self.admin_id = config["admin_id"]
         self.target1 = config["target1"]
+        self.app = Client(
+            "MineSweeperEngine", api_id=self.api_id, api_hash=self.api_hash
+        )
+
         self.tranc = {
             "⬜️": -1,
             " ": 0,
@@ -29,12 +34,14 @@ class App(object):
             "🔵️": 9,
             "🔴": 9,
         }
-
-        self.app = Client(
-            "MineSweeperEngine", api_id=self.api_id, api_hash=self.api_hash
-        )
-
         self.maps = {}
+
+        async def new_game():
+            await self.app.send_message(self.target1, "🏆 Play in Minroob League")
+
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(new_game, "interval", seconds=60)
+        scheduler.start()
 
         self.message_manager()
         self.app.run()
@@ -75,9 +82,6 @@ class App(object):
                 except TimeoutError:
                     pass
 
-        system("clear")
-        print(self.maps[m.id])
-
     def message_manager(self):
         @self.app.on_edited_message(filters.chat(int(self.target1)))
         async def F_message(client: Client, m: Message):
@@ -90,7 +94,13 @@ class App(object):
 
         @self.app.on_message(filters.chat(int(self.target1)))
         async def new_message(client: Client, m: Message):
-            if (
+            if "inline_keyboard" in dir(m.reply_markup) and len(
+                m.reply_markup.inline_keyboard
+            ) in [2, 3]:
+                await client.request_callback_answer(
+                    m.chat.id, m.id, m.reply_markup.inline_keyboard[0][0].callback_data
+                )
+            elif (
                 "inline_keyboard" in dir(m.reply_markup)
                 and len(m.reply_markup.inline_keyboard) == 10
                 and m.text[:11] == "🎮 #Turn: ⁩"
