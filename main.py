@@ -1,8 +1,8 @@
 from json import dump, load
 from os import listdir, mkdir, path, system
 
-import pyrogram
 from pyrogram import Client, filters
+from pyrogram.types.messages_and_media.message import Message
 
 from classes import Map
 
@@ -36,9 +36,7 @@ class App(object):
 
         self.maps = {}
 
-        self.start()
-        self.update()
-
+        self.message_manager()
         self.app.run()
 
     def extractor(self, inp: list):
@@ -54,69 +52,58 @@ class App(object):
                 )
         return out
 
-    def update(self):
+    async def game_manager(self, client: Client, m: Message):
+        inp = self.extractor(m.reply_markup.inline_keyboard)
+        if not path.exists(path.join(".", "data_saver", f"{m.id}")):
+            mkdir(path.join(".", "data_saver", f"{m.id}"))
+            await m.reply(m.id)
+        id = len(listdir(path.join(".", "data_saver", f"{m.id}")))
+        with open(path.join(".", "data_saver", f"{m.id}", f"{id:>02}.json"), "w") as f:
+            dump(inp, f)
+
+        self.maps[m.id] = self.maps.get(m.id, Map(7, 8, 15)).update(inp)
+
+        for i in self.maps[m.id].moves():
+            inline = m.reply_markup.inline_keyboard[7 - i[1]][i[0]]
+            if self.tranc[inline.text] == -1:
+                try:
+                    await client.request_callback_answer(
+                        m.chat.id,
+                        m.id,
+                        inline.callback_data,
+                    )
+                except TimeoutError:
+                    pass
+
+        system("clear")
+        print(self.maps[m.id])
+
+    def message_manager(self):
         @self.app.on_edited_message(filters.chat(int(self.target1)))
-        async def update(
-            client: Client, m: pyrogram.types.messages_and_media.message.Message
-        ):
+        async def F_message(client: Client, m: Message):
             if (
                 "inline_keyboard" in dir(m.reply_markup)
                 and len(m.reply_markup.inline_keyboard) == 10
                 and m.text[:11] == "🎮 #Turn: ⁩"
-                # and m.from_user.id == 1040284003
             ):
-                inp = self.extractor(m.reply_markup.inline_keyboard)
-                if not path.exists(path.join(".", "data_saver", f"{m.id}")):
-                    mkdir(path.join(".", "data_saver", f"{m.id}"))
-                    await m.reply(m.id)
-                id = len(listdir(path.join(".", "data_saver", f"{m.id}")))
-                with open(
-                    path.join(".", "data_saver", f"{m.id}", f"{id:>02}.json"), "w"
-                ) as f:
-                    dump(inp, f)
+                await self.game_manager(client, m)
 
-                self.maps[m.id] = self.maps.get(m.id, Map(7, 8, 15)).update(inp)
-
-                for i in self.maps[m.id].moves():
-                    inline = m.reply_markup.inline_keyboard[7 - i[1]][i[0]]
-                    if self.tranc[inline.text] == -1:
-                        try:
-                            await client.request_callback_answer(
-                                m.chat.id,
-                                m.id,
-                                inline.callback_data,
-                            )
-                        except TimeoutError:
-                            pass
-
-                system("clear")
-                print(self.maps[m.id])
-
-    def start(self):
         @self.app.on_message(filters.chat(int(self.target1)))
-        async def start(client, m: pyrogram.types.messages_and_media.message.Message):
+        async def new_message(client: Client, m: Message):
             if (
                 "inline_keyboard" in dir(m.reply_markup)
                 and len(m.reply_markup.inline_keyboard) == 10
+                and m.text[:11] == "🎮 #Turn: ⁩"
             ):
-                await m.reply(m.id)
-                mkdir(path.join(".", "data_saver", f"{m.id}"))
-
-                self.maps[m.id] = Map(7, 8, 15)
-                mv = self.maps[m.id].moves()[0]
-                inline = m.reply_markup.inline_keyboard[7 - mv[1]][mv[0]]
-                await client.request_callback_answer(
-                    m.chat.id, m.id, inline.callback_data
-                    )
+                await self.game_manager(client, m)
 
 
 if __name__ == "__main__":
-    # app = Client("MineSweeperEngine")
+    App()
 
+    # app = Client("MineSweeperEngine")
     # async def main():
     #     async with app:
     #         async for dialog in app.get_dialogs():
     #             print(dialog.chat.title, dialog.chat.first_name, dialog.chat.id)
-
     # app.run(main())
-    App()
