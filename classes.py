@@ -1,4 +1,5 @@
 from fractions import Fraction
+from itertools import product
 from json import load
 from os import path
 from random import choice
@@ -355,7 +356,39 @@ class Map(object):
                     (*k, -2) for k in i[1][i[2][0] :]
                 ]
 
-        # TODO: search for last floor comb
+        self.possible_comb = list()
+        rem = self.mines - [self[i] for i in self.main_map].count(9)
+
+        def X(x):
+            return rem - sum(x) in self.group[-1][2]
+
+        for i in filter(X, product(*[i[2] for i in self.group[:-1]])):
+            i = (*i, rem - sum(i))
+            new = Map(self.x, self.y, self.mines)
+            new.update(
+                [(*k, self[k]) for k in self.main_map]
+                + sum(
+                    [
+                        [(*k, 9) for k in self.group[j_][1][:j]]
+                        + [(*k, -2) for k in self.group[j_][1][j:]]
+                        for j_, j in enumerate(i)
+                    ],
+                    [],
+                ),
+                composite=False,
+            )
+
+            if new.check():
+                self.possible_comb.append(i)
+
+        for i_, i in enumerate(self.group):
+            for j in i[2][::-1]:
+                if j not in [k[i_] for k in self.possible_comb]:
+                    i[2].remove(j)
+
+        if self.group_id():
+            return True
+
         return False
 
     def update(self, inp: list, composite: bool = True) -> None:
@@ -379,11 +412,12 @@ class Map(object):
 
 if __name__ == "__main__":
     map = Map(7, 8, 15)
-    with open(path.join(".", "data_saver", "723058", "20.json"), "r") as f:
+    # with open(path.join(".", "data_saver", "733292", "11.json"), "r") as f:
+    with open(path.join(".", "data_saver", "734055", "05.json"), "r") as f:
         inp = [tuple(i) for i in load(f)]
 
     t1 = time()
-    map.update(inp, composite=False)
+    map.update(inp)
     t2 = time()
 
     print(map)
