@@ -36,13 +36,13 @@ road map:
         2.2) working with bot  
             ✅2.2.1) translate data from bot to program  
                 2.2.1.1) lose algorithm for advertising  
-            2.2.2) start a new game automatically  
+            ✅2.2.2) start a new game automatically  
             2.2.3) messages handling  
                 2.2.3.1) block manager  
             2.2.4) request for play again  
             2.2.5) get free coin  
         2.3) play more than 1 game at the same time and define maximum of same-time games  
-            2.3.1) duplicate games  
+            ✅2.3.1) duplicate games  
             2.3.2) time sleep for movements  
             2.3.3) try all fields  
                 2.3.3.1) improve performance report  

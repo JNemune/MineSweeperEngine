@@ -79,7 +79,7 @@ class App(object):
                         m.id,
                         inline.callback_data,
                     )
-                except TimeoutError:
+                except:
                     pass
 
     def message_manager(self):
@@ -97,9 +97,12 @@ class App(object):
             if "inline_keyboard" in dir(m.reply_markup) and len(
                 m.reply_markup.inline_keyboard
             ) in [2, 3]:
-                await client.request_callback_answer(
-                    m.chat.id, m.id, m.reply_markup.inline_keyboard[0][0].callback_data
-                )
+                try:
+                    await client.request_callback_answer(
+                        m.chat.id, m.id, m.reply_markup.inline_keyboard[0][0].callback_data
+                    )
+                except:
+                    pass
             elif (
                 "inline_keyboard" in dir(m.reply_markup)
                 and len(m.reply_markup.inline_keyboard) == 10
