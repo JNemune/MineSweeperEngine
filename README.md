@@ -9,7 +9,7 @@ road map:
            ✅1.2.1) identify with one neighbor  
            ✅1.2.2) identify whit more than one neighbor  
            ✅1.2.3) use numbers of all mines in the filed  
-        1.3) probability calculation  
+        ✅1.3) probability calculation  
         1.4) prepare a checker(generate map and solve it)  
             1.4.1) prepare performance reports  
         1.5) choice between same-chance houses  

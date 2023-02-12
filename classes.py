@@ -1,6 +1,6 @@
-from fractions import Fraction
 from itertools import product
 from json import load
+from math import comb, prod
 from os import path
 from random import choice
 from time import time
@@ -11,7 +11,7 @@ class House(object):
         self,
         x: int,
         y: int,
-        posiblity: Fraction,
+        possibility: float,
         situation: int,
         neighbors: list,
         actual: int = -1,
@@ -21,12 +21,12 @@ class House(object):
         x: int & y: int
             the house coordinates
 
-        posiblity: Fraction
-            the posiblity of house being mine
+        possibility: float
+            the possibility of house being mine
 
         situation: int
             0 - 8: number of the house (0 is hole)
-            9: mine (posiblity is 1)
+            9: mine (possibility is 1)
             -1: not specified
             -2: zero posibility
 
@@ -47,7 +47,7 @@ class House(object):
         """
         self.x = x
         self.y = y
-        self.posiblity = posiblity
+        self.possibility = possibility
         self.situation = situation
         self.neighbors = neighbors
         self.actual = actual
@@ -60,7 +60,7 @@ class House(object):
         return self.x == __o.x and self.y == __o.y and self.situation == __o.situation
 
     def __str__(self) -> str:
-        # TODO: in futur printing posiblity with colorama
+        # TODO: in futur printing possibility with colorama
         match self.situation:
             case -2:
                 return "."
@@ -90,9 +90,9 @@ class Map(object):
         self.y = y
         self.mines = mines
 
-        posiblity = Fraction(mines, x * y)
+        possibility = mines / x / y
         self.main_map = {
-            (i, j): House(i, j, posiblity, -1, self.neighbor(i, j), -1, -1)
+            (i, j): House(i, j, possibility, -1, self.neighbor(i, j), -1, -1)
             for i in range(x)
             for j in range(y)
         }
@@ -106,10 +106,10 @@ class Map(object):
         if self[key] not in [-1, -2] or self[key] == value:
             return
         self.main_map[key].situation = value
-        if value == -2:
-            self.main_map[key].posiblity = Fraction(0, 1)
-        elif value == 9:
-            self.main_map[key].posiblity = Fraction(1, 1)
+        if value == 9:
+            self.main_map[key].possibility = 1
+        else:
+            self.main_map[key].possibility = 0
         self.potential_actual_update()
         self.grouping()
         while self.simple_id(key):
@@ -148,9 +148,15 @@ class Map(object):
         return self.__str__()
 
     def moves(self):
-        _1 = [i for i in self.main_map if self[i] == -1]
-        _9 = [i for i in self.main_map if self[i] == 9]
-        return _9 + ([choice(_1)] if _1 else [])
+        p1 = [i for i in self.main_map if self.main_map[i].possibility == 1]
+        p = [
+            (i, self.main_map[i].possibility)
+            for i in self.main_map
+            if self.main_map[i].possibility not in [0, 1]
+        ]
+        p.sort(key=lambda x: x[1], reverse=True)
+        p_max = [i[0] for i in p if i[1] == p[0][1]]
+        return p1 + [choice(p_max) if p_max else []]
 
     def neighbor(self, x: int, y: int) -> list:
         """
@@ -283,7 +289,7 @@ class Map(object):
 
     def simple_id(self, inp: tuple) -> bool:
         """
-        find 100% & 0% mine posiblity in simple nieghbors of the house
+        find 100% & 0% mine possibility in simple nieghbors of the house
         inp: tuple
             (x: int, y: int)
             the coordinate of the house
@@ -389,6 +395,21 @@ class Map(object):
         if self.group_id():
             return True
 
+        group_num = [len(i[1]) for i in self.group]
+        comb_num = [
+            prod([comb(group_num[j_], j) for j_, j in enumerate(i)])
+            for i in self.possible_comb
+        ]
+        for i_, i in enumerate(self.group):
+            p = sum(
+                [
+                    j / group_num[i_] * comb_num[j_]
+                    for j_, j in enumerate([k[i_] for k in self.possible_comb])
+                ]
+            ) / sum(comb_num)
+            for j in i[1]:
+                self.main_map[j].possibility = p
+
         return False
 
     def update(self, inp: list, composite: bool = True) -> None:
@@ -413,7 +434,7 @@ class Map(object):
 if __name__ == "__main__":
     map = Map(7, 8, 15)
     # with open(path.join(".", "data_saver", "733292", "11.json"), "r") as f:
-    with open(path.join(".", "data_saver", "734055", "05.json"), "r") as f:
+    with open(path.join(".", "data_saver", "734972", "09.json"), "r") as f:
         inp = [tuple(i) for i in load(f)]
 
     t1 = time()
@@ -421,4 +442,5 @@ if __name__ == "__main__":
     t2 = time()
 
     print(map)
+    print(map.moves())
     print(t2 - t1)
