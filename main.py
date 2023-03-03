@@ -99,7 +99,9 @@ class App(object):
             ) in [2, 3]:
                 try:
                     await client.request_callback_answer(
-                        m.chat.id, m.id, m.reply_markup.inline_keyboard[0][0].callback_data
+                        m.chat.id,
+                        m.id,
+                        m.reply_markup.inline_keyboard[0][0].callback_data,
                     )
                 except:
                     pass
@@ -114,9 +116,17 @@ class App(object):
 if __name__ == "__main__":
     App()
 
-    # app = Client("MineSweeperEngine")
+    # with open(path.join(".", "target", "config.json"), "r") as f:
+    #     config = load(f)
+    # api_id = config["api_id"]
+    # api_hash = config["api_hash"]
+    # admin_id = config["admin_id"]
+    # target1 = config["target1"]
+    # app = Client("MineSweeperEngine", api_id=api_id, api_hash=api_hash)
+
     # async def main():
     #     async with app:
     #         async for dialog in app.get_dialogs():
     #             print(dialog.chat.title, dialog.chat.first_name, dialog.chat.id)
+
     # app.run(main())
