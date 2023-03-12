@@ -1,8 +1,8 @@
 from json import dump, load
-from os import listdir, mkdir, path, system
+from os import listdir, mkdir, path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from pyrogram import Client, filters
+from pyrogram import Client, filters, idle
 from pyrogram.types.messages_and_media.message import Message
 
 from classes import Map
@@ -16,9 +16,8 @@ class App(object):
         self.api_hash = config["api_hash"]
         self.admin_id = config["admin_id"]
         self.target1 = config["target1"]
-        self.app = Client(
-            "MineSweeperEngine", api_id=self.api_id, api_hash=self.api_hash
-        )
+        self.app1 = Client("Account1", api_id=self.api_id, api_hash=self.api_hash)
+        self.app2 = Client("Account2", api_id=self.api_id, api_hash=self.api_hash)
 
         self.tranc = {
             "⬜️": -1,
@@ -37,14 +36,18 @@ class App(object):
         self.maps = {}
 
         async def new_game():
-            await self.app.send_message(self.target1, "🏆 Play in Minroob League")
+            await self.app1.send_message(self.target1, "🏆 Play in Minroob League")
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(new_game, "interval", seconds=60)
+        scheduler.add_job(new_game, "interval", seconds=120)
         scheduler.start()
 
         self.message_manager()
-        self.app.run()
+        self.app1.start()
+        self.app2.start()
+        idle()
+        self.app1.stop()
+        self.app2.stop()
 
     def extractor(self, inp: list):
         out = list()
@@ -63,7 +66,7 @@ class App(object):
         inp = self.extractor(m.reply_markup.inline_keyboard)
         if not path.exists(path.join(".", "data_saver", f"{m.id}")):
             mkdir(path.join(".", "data_saver", f"{m.id}"))
-            await m.reply(m.id)
+            # await m.reply(m.id)
         id = len(listdir(path.join(".", "data_saver", f"{m.id}")))
         with open(path.join(".", "data_saver", f"{m.id}", f"{id:>02}.json"), "w") as f:
             dump(inp, f)
@@ -83,7 +86,8 @@ class App(object):
                     pass
 
     def message_manager(self):
-        @self.app.on_edited_message(filters.chat(int(self.target1)))
+        @self.app1.on_edited_message(filters.chat(int(self.target1)))
+        @self.app2.on_edited_message(filters.group)
         async def F_message(client: Client, m: Message):
             if (
                 "inline_keyboard" in dir(m.reply_markup)
@@ -92,7 +96,8 @@ class App(object):
             ):
                 await self.game_manager(client, m)
 
-        @self.app.on_message(filters.chat(int(self.target1)))
+        @self.app1.on_message(filters.chat(int(self.target1)))
+        @self.app2.on_message(filters.group)
         async def new_message(client: Client, m: Message):
             if "inline_keyboard" in dir(m.reply_markup) and len(
                 m.reply_markup.inline_keyboard
@@ -122,11 +127,11 @@ if __name__ == "__main__":
     # api_hash = config["api_hash"]
     # admin_id = config["admin_id"]
     # target1 = config["target1"]
-    # app = Client("MineSweeperEngine", api_id=api_id, api_hash=api_hash)
+    # app1 = Client("MineSweeperEngine", api_id=api_id, api_hash=api_hash)
 
     # async def main():
-    #     async with app:
-    #         async for dialog in app.get_dialogs():
+    #     async with app1:
+    #         async for dialog in app1.get_dialogs():
     #             print(dialog.chat.title, dialog.chat.first_name, dialog.chat.id)
 
-    # app.run(main())
+    # app1.run(main())
