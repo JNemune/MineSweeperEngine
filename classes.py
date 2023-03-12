@@ -156,7 +156,10 @@ class Map(object):
         ]
         p.sort(key=lambda x: x[1], reverse=True)
         p_max = [i[0] for i in p if i[1] == p[0][1]]
-        return p1 + [choice(p_max) if p_max else []]
+        anti_whole = [
+            i for i in p_max if any([self[j] == 9 for j in self.main_map[i].neighbors])
+        ]
+        return p1 + [choice(anti_whole if anti_whole else p_max) if p_max else []]
 
     def neighbor(self, x: int, y: int) -> list:
         """
@@ -434,7 +437,7 @@ class Map(object):
 if __name__ == "__main__":
     map = Map(7, 8, 15)
     # with open(path.join(".", "data_saver", "733292", "11.json"), "r") as f:
-    with open(path.join(".", "data_saver", "734972", "09.json"), "r") as f:
+    with open(path.join(".", "data_saver", "753269", "05.json"), "r") as f:
         inp = [tuple(i) for i in load(f)]
 
     t1 = time()
