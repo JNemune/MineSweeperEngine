@@ -159,7 +159,7 @@ class Map(object):
         anti_whole = [
             i for i in p_max if any([self[j] == 9 for j in self.main_map[i].neighbors])
         ]
-        return p1 + [choice(anti_whole if anti_whole else p_max) if p_max else []]
+        return p1 + ([choice(anti_whole if anti_whole else p_max)] if p_max else [])
 
     def neighbor(self, x: int, y: int) -> list:
         """
@@ -369,9 +369,15 @@ class Map(object):
         rem = self.mines - [self[i] for i in self.main_map].count(9)
 
         def X(x):
-            return rem - sum(x) in self.group[-1][2]
+            if self.group:
+                return rem - sum(x) in self.group[-1][2]
+            return rem == sum(x)
 
+        if len(self.group) == 1:
+            self.possible_comb = [(self.group[0][2][0],)]
         for i in filter(X, product(*[i[2] for i in self.group[:-1]])):
+            if not i:
+                continue
             i = (*i, rem - sum(i))
             new = Map(self.x, self.y, self.mines)
             new.update(
@@ -437,7 +443,7 @@ class Map(object):
 if __name__ == "__main__":
     map = Map(7, 8, 15)
     # with open(path.join(".", "data_saver", "733292", "11.json"), "r") as f:
-    with open(path.join(".", "data_saver", "753269", "05.json"), "r") as f:
+    with open(path.join(".", "data_saver", "759273", "10.json"), "r") as f:
         inp = [tuple(i) for i in load(f)]
 
     t1 = time()
