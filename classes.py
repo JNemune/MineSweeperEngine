@@ -148,18 +148,30 @@ class Map(object):
         return self.__str__()
 
     def moves(self):
-        p1 = [i for i in self.main_map if self.main_map[i].possibility == 1]
+        p100 = [i for i in self.main_map if self.main_map[i].possibility == 1]
         p = [
-            (i, self.main_map[i].possibility)
+            (
+                i,
+                self.main_map[i].possibility,
+                len([j for j in self.main_map[i].neighbors if self[j] == -1]),
+            )
             for i in self.main_map
             if self.main_map[i].possibility not in [0, 1]
         ]
         p.sort(key=lambda x: x[1], reverse=True)
-        p_max = [i[0] for i in p if i[1] == p[0][1]]
+
+        p_max = [(i[0], i[2]) for i in p if i[1] == p[0][1]]
         anti_whole = [
-            i for i in p_max if any([self[j] == 9 for j in self.main_map[i].neighbors])
+            i
+            for i in p_max
+            if any([self[j] == 9 for j in self.main_map[i[0]].neighbors])
         ]
-        return p1 + ([choice(anti_whole if anti_whole else p_max)] if p_max else [])
+        if anti_whole:
+            p_max = anti_whole
+        p_max.sort(key=lambda x: x[1], reverse=True)
+        p_maxest = [i[0] for i in p_max if i[1] == p_max[0][1]]
+
+        return p100 + ([choice(p_maxest)] if p_maxest else [])
 
     def neighbor(self, x: int, y: int) -> list:
         """
