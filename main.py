@@ -34,12 +34,13 @@ class App(object):
             "🔴": 9,
         }
         self.maps = {}
+        self.move = dict()
 
         async def new_game():
             await self.app1.send_message(self.target1, "🏆 Play in Minroob League")
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(new_game, "interval", seconds=120)
+        scheduler.add_job(new_game, "interval", seconds=90)
         scheduler.start()
 
         self.message_manager()
@@ -62,60 +63,72 @@ class App(object):
                 )
         return out
 
-    async def game_manager(self, client: Client, m: Message):
-        inp = self.extractor(m.reply_markup.inline_keyboard)
+    def turn(self, m: Message):
+        try:
+            if m.text[:11] == "🎮 #Turn: ⁩":
+                return True
+            return False
+        except:
+            return False
+
+    async def game_manager(self, client: Client, m: Message, forced=False):
         if not path.exists(path.join(".", "data_saver", f"{m.id}")):
             mkdir(path.join(".", "data_saver", f"{m.id}"))
+            self.maps[m.id] = Map(7, 8, 15)
+            self.move[m.id] = []
             # await m.reply(m.id)
+        inp = self.extractor(m.reply_markup.inline_keyboard)
         id = len(listdir(path.join(".", "data_saver", f"{m.id}")))
         with open(path.join(".", "data_saver", f"{m.id}", f"{id:>02}.json"), "w") as f:
             dump(inp, f)
 
-        self.maps[m.id] = self.maps.get(m.id, Map(7, 8, 15)).update(inp)
+        if not self.turn(m) and not forced:
+            return
 
-        for i in self.maps[m.id].moves():
-            inline = m.reply_markup.inline_keyboard[7 - i[1]][i[0]]
-            if self.tranc[inline.text] == -1:
-                try:
-                    await client.request_callback_answer(
-                        m.chat.id,
-                        m.id,
-                        inline.callback_data,
-                    )
-                except:
-                    pass
+        try:
+            next_move = self.move[m.id].pop(0)
+        except IndexError:
+            self.maps[m.id].update(inp)
+            self.move[m.id] = [i for i in self.maps[m.id].moves() if (*i, -1) in inp]
+            next_move = self.move[m.id].pop(0)
+        inline = m.reply_markup.inline_keyboard[7 - next_move[1]][next_move[0]]
+        try:
+            await client.request_callback_answer(
+                m.chat.id,
+                m.id,
+                inline.callback_data,
+            )
+        except TimeoutError:
+            pass
 
     def message_manager(self):
         @self.app1.on_edited_message(filters.chat(int(self.target1)))
         @self.app2.on_edited_message(filters.group)
         async def F_message(client: Client, m: Message):
-            if (
-                "inline_keyboard" in dir(m.reply_markup)
-                and len(m.reply_markup.inline_keyboard) == 10
-                and m.text[:11] == "🎮 #Turn: ⁩"
-            ):
-                await self.game_manager(client, m)
+            if "inline_keyboard" in dir(m.reply_markup):
+                match len(m.reply_markup.inline_keyboard):
+                    case 10:
+                        await self.game_manager(client, m)
+                    case 12:
+                        del self.maps[m.id]
+                        del self.move[m.id]
 
         @self.app1.on_message(filters.chat(int(self.target1)))
         @self.app2.on_message(filters.group)
         async def new_message(client: Client, m: Message):
-            if "inline_keyboard" in dir(m.reply_markup) and len(
-                m.reply_markup.inline_keyboard
-            ) in [2, 3]:
-                try:
-                    await client.request_callback_answer(
-                        m.chat.id,
-                        m.id,
-                        m.reply_markup.inline_keyboard[0][0].callback_data,
-                    )
-                except:
-                    pass
-            elif (
-                "inline_keyboard" in dir(m.reply_markup)
-                and len(m.reply_markup.inline_keyboard) == 10
-                and m.text[:11] == "🎮 #Turn: ⁩"
-            ):
-                await self.game_manager(client, m)
+            if "inline_keyboard" in dir(m.reply_markup):
+                match len(m.reply_markup.inline_keyboard):
+                    case 2 | 3:
+                        try:
+                            await client.request_callback_answer(
+                                m.chat.id,
+                                m.id,
+                                m.reply_markup.inline_keyboard[0][0].callback_data,
+                            )
+                        except:
+                            pass
+                    case 10:
+                        await self.game_manager(client, m)
 
 
 if __name__ == "__main__":
