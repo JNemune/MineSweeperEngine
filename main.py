@@ -68,7 +68,7 @@ class App(object):
 
     def turn(self, m: Message):
         try:
-            if m.text[9] == "⁩":
+            if m.text[9:12] == " ⁩ ":
                 return True
             return False
         except:
