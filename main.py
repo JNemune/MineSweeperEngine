@@ -21,13 +21,16 @@ class App(object):
 
         self.tranc = {
             "⬜️": -1,
+            "🔲": -1,
             " ": 0,
             "1⃣": 1,
+            "1️⃣": 1,
             "2⃣": 2,
             "3⃣": 3,
             "4⃣": 4,
             "5⃣": 5,
             "6⃣": 6,
+            "6️⃣": 6,
             "7⃣": 7,
             "8⃣": 8,
             "🔵️": 9,
@@ -40,7 +43,7 @@ class App(object):
             await self.app1.send_message(self.target1, "🏆 Play in Minroob League")
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(new_game, "interval", seconds=90)
+        scheduler.add_job(new_game, "interval", seconds=75)
         scheduler.start()
 
         self.message_manager()
@@ -65,7 +68,7 @@ class App(object):
 
     def turn(self, m: Message):
         try:
-            if m.text[:11] == "🎮 #Turn: ⁩":
+            if m.text[9] == "⁩":
                 return True
             return False
         except:
@@ -118,7 +121,7 @@ class App(object):
         async def new_message(client: Client, m: Message):
             if "inline_keyboard" in dir(m.reply_markup):
                 match len(m.reply_markup.inline_keyboard):
-                    case 2 | 3:
+                    case 3:
                         try:
                             await client.request_callback_answer(
                                 m.chat.id,
