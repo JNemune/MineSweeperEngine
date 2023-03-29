@@ -14,7 +14,6 @@ class App(object):
             config = load(f)
         self.api_id = config["api_id"]
         self.api_hash = config["api_hash"]
-        self.admin_id = config["admin_id"]
         self.target1 = config["target1"]
         self.app = Client("Account1", api_id=self.api_id, api_hash=self.api_hash)
 
@@ -146,7 +145,6 @@ if __name__ == "__main__":
     #     config = load(f)
     # api_id = config["api_id"]
     # api_hash = config["api_hash"]
-    # admin_id = config["admin_id"]
     # target1 = config["target1"]
     # app = Client("MineSweeperEngine", api_id=api_id, api_hash=api_hash)
 
