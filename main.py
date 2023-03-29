@@ -2,7 +2,7 @@ from json import dump, load
 from os import listdir, mkdir, path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from pyrogram import Client
+from pyrogram import Client, filters
 from pyrogram.types.messages_and_media.message import Message
 
 from classes import Map
@@ -37,9 +37,11 @@ class App(object):
         }
         self.maps = {}
         self.move = dict()
+        self.on = True
 
         async def new_game():
-            await self.app.send_message(self.target1, "🏆 Play in Minroob League")
+            if self.on:
+                await self.app.send_message(self.target1, "🏆 Play in Minroob League")
 
         scheduler = AsyncIOScheduler()
         scheduler.add_job(new_game, "interval", seconds=75)
@@ -104,7 +106,7 @@ class App(object):
     def message_manager(self):
         @self.app.on_edited_message()
         async def F_message(client: Client, m: Message):
-            if "inline_keyboard" in dir(m.reply_markup):
+            if self.on and "inline_keyboard" in dir(m.reply_markup):
                 match len(m.reply_markup.inline_keyboard):
                     case 10:
                         await self.game_manager(client, m)
@@ -114,7 +116,7 @@ class App(object):
 
         @self.app.on_message()
         async def new_message(client: Client, m: Message):
-            if "inline_keyboard" in dir(m.reply_markup):
+            if self.on and "inline_keyboard" in dir(m.reply_markup):
                 match len(m.reply_markup.inline_keyboard):
                     case 3:
                         try:
@@ -127,6 +129,14 @@ class App(object):
                             pass
                     case 10:
                         await self.game_manager(client, m)
+
+        @self.app.on_message(filters.me)
+        async def on_off(client: Client, m: Message):
+            match m.text:
+                case "ON":
+                    self.on = True
+                case "OFF":
+                    self.on = False
 
 
 if __name__ == "__main__":
