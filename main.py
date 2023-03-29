@@ -2,7 +2,7 @@ from json import dump, load
 from os import listdir, mkdir, path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from pyrogram import Client, filters, idle
+from pyrogram import Client
 from pyrogram.types.messages_and_media.message import Message
 
 from classes import Map
@@ -16,8 +16,7 @@ class App(object):
         self.api_hash = config["api_hash"]
         self.admin_id = config["admin_id"]
         self.target1 = config["target1"]
-        self.app1 = Client("Account1", api_id=self.api_id, api_hash=self.api_hash)
-        self.app2 = Client("Account2", api_id=self.api_id, api_hash=self.api_hash)
+        self.app = Client("Account1", api_id=self.api_id, api_hash=self.api_hash)
 
         self.tranc = {
             "⬜️": -1,
@@ -40,18 +39,14 @@ class App(object):
         self.move = dict()
 
         async def new_game():
-            await self.app1.send_message(self.target1, "🏆 Play in Minroob League")
+            await self.app.send_message(self.target1, "🏆 Play in Minroob League")
 
         scheduler = AsyncIOScheduler()
         scheduler.add_job(new_game, "interval", seconds=75)
         scheduler.start()
 
         self.message_manager()
-        self.app1.start()
-        self.app2.start()
-        idle()
-        self.app1.stop()
-        self.app2.stop()
+        self.app.run()
 
     def extractor(self, inp: list):
         out = list()
@@ -66,9 +61,11 @@ class App(object):
                 )
         return out
 
-    def turn(self, m: Message):
+    async def turn(self, m: Message):
+        user = await self.app.get_users("me")
+        first_name = user.first_name
         try:
-            if m.text[9:12] == " ⁩ ":
+            if m.text[10 : 11 + len(first_name)] == first_name + " ":
                 return True
             return False
         except:
@@ -85,7 +82,7 @@ class App(object):
         with open(path.join(".", "data_saver", f"{m.id}", f"{id:>02}.json"), "w") as f:
             dump(inp, f)
 
-        if not self.turn(m) and not forced:
+        if not await self.turn(m) and not forced:
             return
 
         try:
@@ -105,8 +102,7 @@ class App(object):
             pass
 
     def message_manager(self):
-        @self.app1.on_edited_message(filters.chat(int(self.target1)))
-        @self.app2.on_edited_message(filters.group)
+        @self.app.on_edited_message()
         async def F_message(client: Client, m: Message):
             if "inline_keyboard" in dir(m.reply_markup):
                 match len(m.reply_markup.inline_keyboard):
@@ -116,8 +112,7 @@ class App(object):
                         del self.maps[m.id]
                         del self.move[m.id]
 
-        @self.app1.on_message(filters.chat(int(self.target1)))
-        @self.app2.on_message(filters.group)
+        @self.app.on_message()
         async def new_message(client: Client, m: Message):
             if "inline_keyboard" in dir(m.reply_markup):
                 match len(m.reply_markup.inline_keyboard):
@@ -143,11 +138,11 @@ if __name__ == "__main__":
     # api_hash = config["api_hash"]
     # admin_id = config["admin_id"]
     # target1 = config["target1"]
-    # app1 = Client("MineSweeperEngine", api_id=api_id, api_hash=api_hash)
+    # app = Client("MineSweeperEngine", api_id=api_id, api_hash=api_hash)
 
     # async def main():
-    #     async with app1:
-    #         async for dialog in app1.get_dialogs():
+    #     async with app:
+    #         async for dialog in app.get_dialogs():
     #             print(dialog.chat.title, dialog.chat.first_name, dialog.chat.id)
 
-    # app1.run(main())
+    # app.run(main())
