@@ -1,3 +1,4 @@
+import asyncio
 from json import dump, load
 from os import listdir, mkdir, path
 
@@ -15,7 +16,8 @@ class App(object):
         self.api_id = config["api_id"]
         self.api_hash = config["api_hash"]
         self.target1 = config["target1"]
-        self.app = Client("Account1", api_id=self.api_id, api_hash=self.api_hash)
+        self.admin = config["admin"]
+        self.app = Client("Account2", api_id=self.api_id, api_hash=self.api_hash)
 
         self.tranc = {
             "⬜️": -1,
@@ -35,11 +37,13 @@ class App(object):
             "🔴": 9,
         }
         self.maps = {}
-        self.move = dict()
+        self.move = {}
         self.on = True
+        self.messages = {}
 
         async def new_game():
             if self.on:
+                await self.app.request_callback_answer("-1001103224082", 196, "jackpot")
                 await self.app.send_message(self.target1, "🏆 Play in Minroob League")
 
         scheduler = AsyncIOScheduler()
@@ -107,11 +111,42 @@ class App(object):
         async def F_message(client: Client, m: Message):
             if self.on and "inline_keyboard" in dir(m.reply_markup):
                 match len(m.reply_markup.inline_keyboard):
+                    case 3 | 4:
+                        if m.chat.id == int(self.target1):
+                            for_m = await m.forward(self.admin)
+                            self.messages[for_m.id] = m.id
                     case 10:
                         await self.game_manager(client, m)
                     case 12:
                         del self.maps[m.id]
                         del self.move[m.id]
+
+        @self.app.on_message(filters.chat(self.admin))
+        async def admin_messsage(client: Client, m: Message):
+            if m.reply_to_message and m.reply_to_message.forward_from.id == int(
+                self.target1
+            ):
+                answer_id = self.messages[m.reply_to_message.id]
+                source_message = await client.get_messages(self.target1, answer_id)
+                inline = source_message.reply_markup.inline_keyboard
+
+                await client.request_callback_answer(
+                    self.target1,
+                    answer_id,
+                    inline[0][0].callback_data,
+                )
+                await asyncio.sleep(3)
+                await m.forward(self.target1)
+
+                del self.messages[m.reply_to_message.id]
+
+        @self.app.on_message(filters.me)
+        async def on_off(client: Client, m: Message):
+            match m.text:
+                case "ON":
+                    self.on = True
+                case "OFF":
+                    self.on = False
 
         @self.app.on_message()
         async def new_message(client: Client, m: Message):
@@ -128,14 +163,6 @@ class App(object):
                             pass
                     case 10:
                         await self.game_manager(client, m)
-
-        @self.app.on_message(filters.me)
-        async def on_off(client: Client, m: Message):
-            match m.text:
-                case "ON":
-                    self.on = True
-                case "OFF":
-                    self.on = False
 
 
 if __name__ == "__main__":
