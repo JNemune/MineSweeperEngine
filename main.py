@@ -126,7 +126,8 @@ class App(object):
                         self.scheduler.add_job(self.game_manager,
                                                      args=(client, m), 
                                                      trigger='date', 
-                                                     run_date=(dt.datetime.now() + dt.timedelta(seconds=5)))
+                                                     run_date=(dt.datetime.now() + dt.timedelta(seconds=1)),
+                                                     misfire_grace_time=None)
                         # await self.game_manager(client, m)
                     case 12:
                         # End of the game
@@ -183,7 +184,8 @@ class App(object):
                         self.scheduler.add_job(self.game_manager,
                                                      args=(client, m), 
                                                      trigger='date', 
-                                                     run_date=(dt.datetime.now() + dt.timedelta(seconds=5)))
+                                                     run_date=(dt.datetime.now() + dt.timedelta(seconds=1)),
+                                                     misfire_grace_time=None)
 
 
 if __name__ == "__main__":
