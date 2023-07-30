@@ -50,3 +50,11 @@ road map:
         2.4) advertising  
             2.4.1) auto answering  
             2.4.2) duplicate persons  
+
+## How to use
+1.clone project
+
+2.create a config file similar to target/config.json.example inside target directory
+> remove proxy part if you don't need it
+
+3.python main.py
