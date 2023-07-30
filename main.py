@@ -1,6 +1,7 @@
 import asyncio
 from json import dump, load
 from os import listdir, mkdir, path
+import datetime as dt
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pyrogram import Client, filters
@@ -17,7 +18,10 @@ class App(object):
         self.api_hash = config["api_hash"]
         self.target1 = config["target1"]
         self.admin = config["admin"]
-        self.app = Client("Account2", api_id=self.api_id, api_hash=self.api_hash)
+        self.new_game_interval = config.get("new_game_interval_seconds") or 75
+        self.new_move_interval = config.get("movement_interval_seconds") or 0
+        self.proxy = config.get("proxy")
+        self.app = Client("Account2", api_id=self.api_id, api_hash=self.api_hash, proxy=self.proxy)
 
         self.tranc = {
             "⬜️": -1,
@@ -43,12 +47,12 @@ class App(object):
 
         async def new_game():
             if self.on:
-                await self.app.request_callback_answer("-1001103224082", 196, "jackpot")
+                # await self.app.request_callback_answer("-1001103224082", 196, "jackpot")
                 await self.app.send_message(self.target1, "🏆 Play in Minroob League")
 
-        scheduler = AsyncIOScheduler()
-        scheduler.add_job(new_game, "interval", seconds=75)
-        scheduler.start()
+        self.scheduler = AsyncIOScheduler()
+        self.scheduler.add_job(new_game, "interval", seconds=self.new_game_interval)
+        self.scheduler.start()
 
         self.message_manager()
         self.app.run()
@@ -111,13 +115,21 @@ class App(object):
         async def F_message(client: Client, m: Message):
             if self.on and "inline_keyboard" in dir(m.reply_markup):
                 match len(m.reply_markup.inline_keyboard):
+                    # CREATIVITY!
                     case 3 | 4:
+                        # chat from appointment (will be forwarded to admin)
                         if m.chat.id == int(self.target1):
                             for_m = await m.forward(self.admin)
                             self.messages[for_m.id] = m.id
                     case 10:
-                        await self.game_manager(client, m)
+                        # in the middle of the game
+                        self.scheduler.add_job(self.game_manager,
+                                                     args=(client, m), 
+                                                     trigger='date', 
+                                                     run_date=(dt.datetime.now() + dt.timedelta(seconds=5)))
+                        # await self.game_manager(client, m)
                     case 12:
+                        # End of the game
                         del self.maps[m.id]
                         del self.move[m.id]
 
@@ -133,7 +145,7 @@ class App(object):
                 await client.request_callback_answer(
                     self.target1,
                     answer_id,
-                    inline[0][0].callback_data,
+                    inline[0][0].callback_data # Answer button click,
                 )
                 await asyncio.sleep(3)
                 await m.forward(self.target1)
@@ -142,17 +154,22 @@ class App(object):
 
         @self.app.on_message(filters.me)
         async def on_off(client: Client, m: Message):
-            match m.text:
+            match m.text.upper():
                 case "ON":
                     self.on = True
+                    await m.reply("turned on", quote=True)
                 case "OFF":
                     self.on = False
+                    await m.reply("turned off", quote=True)
+
+                    
 
         @self.app.on_message()
         async def new_message(client: Client, m: Message):
             if self.on and "inline_keyboard" in dir(m.reply_markup):
                 match len(m.reply_markup.inline_keyboard):
                     case 3:
+                        # request Starting new game
                         try:
                             await client.request_callback_answer(
                                 m.chat.id,
@@ -162,10 +179,15 @@ class App(object):
                         except:
                             pass
                     case 10:
-                        await self.game_manager(client, m)
+                        # starting new game
+                        self.scheduler.add_job(self.game_manager,
+                                                     args=(client, m), 
+                                                     trigger='date', 
+                                                     run_date=(dt.datetime.now() + dt.timedelta(seconds=5)))
 
 
 if __name__ == "__main__":
+    if not path.exists("data_saver"): mkdir("data_saver") 
     App()
 
     # with open(path.join(".", "target", "config.json"), "r") as f:
