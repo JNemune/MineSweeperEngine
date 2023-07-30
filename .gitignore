@@ -74,8 +74,8 @@ instance/
 # Sphinx documentation
 docs/_build/
 
-# PyBuilder
-target/
+# # PyBuilder
+# target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -136,3 +136,4 @@ dmypy.json
 *.session-journal
 
 # Specific
+config.json

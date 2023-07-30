@@ -1,0 +1,13 @@
+{
+    "api_id": YOUR_API_ID,
+    "api_hash": YOUR_API_HASH,
+    "target1": YOUR_TARGET_ID (chat id for playing game inside),
+    "admin": 560633091,
+    "new_game_interval_seconds": CUSTOM AMOUNT (75 recommended),
+    "movement_interval_seconds": CUSTOM AMOUNT (can be zero) 
+    "proxy": {
+        "scheme": "socks5",
+        "hostname": "127.0.0.1",
+        "port": 1234
+    }
+}
