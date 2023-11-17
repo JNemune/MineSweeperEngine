@@ -4,6 +4,7 @@ from math import comb, prod
 from os import path
 from random import choice
 from time import time
+from typing import Union
 
 
 class House(object):
@@ -15,7 +16,7 @@ class House(object):
         situation: int,
         neighbors: list,
         actual: int = -1,
-        potential: list | None = None,
+        potential: Union[list, None] = None,
     ) -> None:
         """
         x: int & y: int
@@ -61,13 +62,12 @@ class House(object):
 
     def __str__(self) -> str:
         # TODO: in futur printing possibility with colorama
-        match self.situation:
-            case -2:
-                return "."
-            case -1:
-                return " "
-            case 9:
-                return "*"
+        if self.situation == -2:
+            return "."
+        if self.situation == -1:
+            return " "
+        if self.situation == 9:
+            return "*"
         return str(self.situation)
 
     def __repr__(self) -> str:

@@ -1,5 +1,6 @@
 # Python 3.10.9
 APScheduler==3.10.0
 black==22.10.0
-Pyrogram==2.0.70
+isort==5.12.0
+Pyrogram==2.0.106
 TgCrypto==1.2.5

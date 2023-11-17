@@ -110,16 +110,16 @@ class App(object):
         @self.app.on_edited_message()
         async def F_message(client: Client, m: Message):
             if self.on and "inline_keyboard" in dir(m.reply_markup):
-                match len(m.reply_markup.inline_keyboard):
-                    case 3 | 4:
-                        if m.chat.id == int(self.target1):
-                            for_m = await m.forward(self.admin)
-                            self.messages[for_m.id] = m.id
-                    case 10:
-                        await self.game_manager(client, m)
-                    case 12:
-                        del self.maps[m.id]
-                        del self.move[m.id]
+                keyboard_size = len(m.reply_markup.inline_keyboard)
+                if keyboard_size in [3, 4]:
+                    if m.chat.id == int(self.target1):
+                        for_m = await m.forward(self.admin)
+                        self.messages[for_m.id] = m.id
+                if keyboard_size == 10:
+                    await self.game_manager(client, m)
+                if keyboard_size == 12:
+                    del self.maps[m.id]
+                    del self.move[m.id]
 
         @self.app.on_message(filters.chat(self.admin))
         async def admin_messsage(client: Client, m: Message):
@@ -142,27 +142,26 @@ class App(object):
 
         @self.app.on_message(filters.me)
         async def on_off(client: Client, m: Message):
-            match m.text:
-                case "ON":
-                    self.on = True
-                case "OFF":
-                    self.on = False
+            if m.text == "ON":
+                self.on = True
+            if m.text == "OFF":
+                self.on = False
 
         @self.app.on_message()
         async def new_message(client: Client, m: Message):
             if self.on and "inline_keyboard" in dir(m.reply_markup):
-                match len(m.reply_markup.inline_keyboard):
-                    case 3:
-                        try:
-                            await client.request_callback_answer(
-                                m.chat.id,
-                                m.id,
-                                m.reply_markup.inline_keyboard[0][0].callback_data,
-                            )
-                        except:
-                            pass
-                    case 10:
-                        await self.game_manager(client, m)
+                keyboard_size = len(m.reply_markup.inline_keyboard)
+                if keyboard_size == 3:
+                    try:
+                        await client.request_callback_answer(
+                            m.chat.id,
+                            m.id,
+                            m.reply_markup.inline_keyboard[0][0].callback_data,
+                        )
+                    except:
+                        pass
+                if keyboard_size == 10:
+                    await self.game_manager(client, m)
 
 
 if __name__ == "__main__":
