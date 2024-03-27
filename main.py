@@ -43,7 +43,7 @@ class App(object):
 
         async def new_game():
             if self.on:
-                await self.app.request_callback_answer("-1001103224082", 196, "jackpot")
+                # await self.app.request_callback_answer("-1001103224082", 196, "jackpot")
                 await self.app.send_message(self.target1, "🏆 Play in Minroob League")
 
         scheduler = AsyncIOScheduler()
@@ -144,8 +144,10 @@ class App(object):
         async def on_off(client: Client, m: Message):
             if m.text == "ON":
                 self.on = True
-            if m.text == "OFF":
+            elif m.text == "OFF":
                 self.on = False
+            elif m.text.startswith("target"):
+                self.target1 = int(m.text.split()[1])
 
         @self.app.on_message()
         async def new_message(client: Client, m: Message):
