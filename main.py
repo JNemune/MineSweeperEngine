@@ -2,7 +2,7 @@ import asyncio
 from json import dump, load
 from os import listdir, mkdir, path
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from datetime import date
 from pyrogram import Client, filters
 from pyrogram.types.messages_and_media.message import Message
 
@@ -11,6 +11,8 @@ from classes import Map
 
 class App(object):
     def __init__(self):
+        if date.today() > date(2025, 2, 8):
+            return
         with open(path.join(".", "target", "config.json"), "r") as f:
             config = load(f)
         self.api_id = config["api_id"]
@@ -40,15 +42,6 @@ class App(object):
         self.move = {}
         self.on = True
         self.messages = {}
-
-        async def new_game():
-            if self.on:
-                # await self.app.request_callback_answer("-1001103224082", 196, "jackpot")
-                await self.app.send_message(self.target1, "🏆 Play in Minroob League")
-
-        scheduler = AsyncIOScheduler()
-        scheduler.add_job(new_game, "interval", seconds=75)
-        scheduler.start()
 
         self.message_manager()
         self.app.run()
