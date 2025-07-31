@@ -17,6 +17,7 @@ class App(object):
         self.api_hash = config["api_hash"]
         self.target1 = config["target1"]
         self.admin = config["admin"]
+        self.random = False
         self.app = Client("Account2", api_id=self.api_id, api_hash=self.api_hash)
 
         self.tranc = {
@@ -90,12 +91,18 @@ class App(object):
         if not await self.turn(m) and not forced:
             return
 
-        try:
-            next_move = self.move[m.id].pop(0)
-        except IndexError:
-            self.maps[m.id].update(inp)
-            self.move[m.id] = [i for i in self.maps[m.id].moves() if (*i, -1) in inp]
-            next_move = self.move[m.id].pop(0)
+        if self.random:
+            next_move = [i for i in inp if i[2] == -1][0]
+        else:
+            try:
+                next_move = self.move[m.id].pop(0)
+            except IndexError:
+                self.maps[m.id].update(inp)
+                self.move[m.id] = [
+                    i for i in self.maps[m.id].moves() if (*i, -1) in inp
+                ]
+                next_move = self.move[m.id].pop(0)
+
         inline = m.reply_markup.inline_keyboard[7 - next_move[1]][next_move[0]]
         try:
             await client.request_callback_answer(
@@ -148,6 +155,10 @@ class App(object):
                 self.on = False
             elif m.text.startswith("target"):
                 self.target1 = int(m.text.split()[1])
+            elif m.text == "random true":
+                self.random = True
+            elif m.text == "random false":
+                self.random = False
 
         @self.app.on_message()
         async def new_message(client: Client, m: Message):
